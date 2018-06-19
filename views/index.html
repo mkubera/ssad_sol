@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Mythological creatures and gods</title>
+</head>
+<body>
+
+  <h2>Mythological creatures and gods:</h2>
+  <ul id="CreaturesList">
+    {% for creature in data %}
+      <li>
+        <h3>{{ creature.name }}</h3> <br>
+        <p>{{ creature.name }}</p> <br>
+        <img src="{{ creature.name }}"> <br>
+      </li>
+    {% else %}
+      <li>The list of creatures & gods is empty...</li>
+    {% endfor %}
+  </ul>
+
+  <div id="ErrorMsg">
+    <p>Failed to load more creatures & gods from the server... Sorry :(</p>
+    <button id="CloseErrorMsg">close</button>
+  </div>
+  <button id="LoadMore">Load more creatures & gods</button>
+
+  <script type="text/javascript">
+    const errorMsg = document.getElementById('ErrorMsg')
+    const closeErrorMsg = document.getElementById('CloseErrorMsg')
+    const loadMoreBtn = document.getElementById('LoadMore')
+
+    // event listeners
+    window.addEventListener('load', function() {
+      errorMsg.hidden = true
+    })
+
+    closeErrorMsg.addEventListener('click', function(e) {
+      errorMsg.hidden = true
+    })
+
+    loadMoreBtn.addEventListener('click', function(event) {
+      fetchNewCreaturesAndAttachToUL()
+    })
+
+
+    // functions
+    function fetchNewCreaturesAndAttachToUL() {
+      fetch('/creatures', {
+        method: 'get'
+      }).then(function(response) {
+        // convert to JSON
+        return response.json()
+      }).then(function(jsObject) {
+        // attach the newly fetched creatures to the UL of creatures
+        attachNewCreaturesToUL(jsObject)
+      }).catch(function(error) {
+        if (error) {
+          // show the error message if fetch returns error
+          errorMsg.hidden = false
+        }
+      })
+    }
+
+    function attachNewCreaturesToUL(jsObject) {
+      const creaturesList = document.getElementById('CreaturesList')
+      const newNodes = jsObject.map((creature) => {
+        let li = document.createElement('li')
+        let h3 = document.createElement('h3')
+        let h3Text = document.createTextNode(creature.name)
+        h3.appendChild(h3Text)
+        let p = document.createElement('p')
+        let pText = document.createTextNode(creature.description)
+        p.appendChild(pText)
+        let img = document.createElement('img')
+        img.src = creature.image
+
+        // append all nodes to an li
+        [h3, p, img].forEach((node) => li.appendChild(node))
+
+        return li
+      })
+    }
+  </script>
+
+</body>
+</html>

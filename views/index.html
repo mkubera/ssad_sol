@@ -8,11 +8,12 @@
 </head>
 <body>
 
+  <!-- CREATURES -->
   <h2>Mythological creatures and gods:</h2>
   <ul id="CreaturesList">
     {% for creature in data %}
       <li>
-        <h3>{{ creature.name }}</h3> <br>
+        <h3>{{ creature.name }} <small>({{ creature.thumbs }}) <button id="{{ creature.id }}" class="thumb-up">ThumbUp</button></small></h3> <br>
         <p>{{ creature.name }}</p> <br>
         <img src="{{ creature.name }}"> <br>
       </li>
@@ -26,11 +27,23 @@
     <button id="CloseErrorMsg">close</button>
   </div>
   <button id="LoadMore">Load more creatures & gods</button>
+  <!-- /CREATURES -->
+
+  <!-- FEEDBACK -->
+  <form action="/feedback" method="post">
+    <p>
+      Please give us feedback! <br>
+      <textarea name="text" id="" cols="30" rows="10"></textarea>
+    </p>
+    <button type="submit">submit feedback</button>
+  </form>
+  <!-- /FEEDBACK -->
 
   <script type="text/javascript">
     const errorMsg = document.getElementById('ErrorMsg')
     const closeErrorMsg = document.getElementById('CloseErrorMsg')
     const loadMoreBtn = document.getElementById('LoadMore')
+    const thumbUpBtns = document.querySelector('.thumb-up')
 
     // event listeners
     window.addEventListener('load', function() {
@@ -42,21 +55,28 @@
     })
 
     loadMoreBtn.addEventListener('click', function(event) {
-      fetchNewCreaturesAndAttachToUL()
+      FetchNewCreaturesAndAttachToUL()
+    })
+
+    thumbUpBtns.forEach((btn) => {
+      btn.addEventListener('click', function(event) {
+        const creatureId = event.target.id
+        ThumbUpACreature(creatureId)
+      })
     })
 
 
     // functions
-    function fetchNewCreaturesAndAttachToUL() {
+    function FetchNewCreaturesAndAttachToUL() {
       fetch('/creatures', {
         method: 'get'
-      }).then(function(response) {
+      }).then((response) => {
         // convert to JSON
         return response.json()
-      }).then(function(jsObject) {
+      }).then((jsObject) => {
         // attach the newly fetched creatures to the UL of creatures
-        attachNewCreaturesToUL(jsObject)
-      }).catch(function(error) {
+        AttachNewCreaturesToUL(jsObject)
+      }).catch((error) => {
         if (error) {
           // show the error message if fetch returns error
           errorMsg.hidden = false
@@ -64,7 +84,7 @@
       })
     }
 
-    function attachNewCreaturesToUL(jsObject) {
+    function AttachNewCreaturesToUL(jsObject) {
       const creaturesList = document.getElementById('CreaturesList')
       const newNodes = jsObject.map((creature) => {
         let li = document.createElement('li')
@@ -82,6 +102,12 @@
 
         return li
       })
+    }
+
+    function ThumbUpACreature(creatureId) {
+      fetch(`/thumbup/${creatureId}`, {
+        method: 'post',
+      }).catch((error) => alert(error))
     }
   </script>
 
